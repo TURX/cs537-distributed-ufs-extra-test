@@ -1,0 +1,25 @@
+('starting', 'build')
+
+**********************************************************************
+
+Test build
+build project using make
+
+**********************************************************************
+Trying to build project using make
+make
+echo "#!/bin/bash" > runtests
+echo "base=~cs537-2/ta/tests/5a" >> runtests
+echo "python \$base/project5a.py --test-path \$base \$@ |"\
+	"tee -i runtests.log" >> runtests
+echo "exit \$?" >> runtests
+chmod a+x runtests
+
+
+test build FAILED
+ (build project using make)
+ required file 'server' does not exist after make
+ required file 'libmfs.so' does not exist after make
+
+Skipped 26 tests.
+To keep testing after failing a test, use flag '-c' or '--continue'
