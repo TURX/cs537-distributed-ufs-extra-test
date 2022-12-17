@@ -1,7 +1,7 @@
 import toolspath
 from testing import BuildTest
 
-tester_files = ["shutdown", "creat", "write", "dirs", "complex"]
+tester_files = ["write", "complex"]
 
 build_test = BuildTest
 build_test.targets = ["server", "libmfs.so"]

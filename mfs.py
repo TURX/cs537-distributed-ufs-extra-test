@@ -3,6 +3,7 @@ import os, time, random
 
 import toolspath
 from testing.test import Test, Failure
+import subprocess
 
 # root inode number
 ROOT = 0
@@ -11,14 +12,15 @@ MFS_DIRECTORY = 0
 MFS_REGULAR_FILE = 1
 MFS_BLOCK_SIZE = 4096
 
-MAX_INODES = 4096
+MAX_INODES = 4096  # 32 from new test
 
 MAX_FILE_BLOCKS = 30
-MAX_FILES_PER_DIR = (MAX_FILE_BLOCKS * MFS_BLOCK_SIZE / 32) - 2
+MAX_FILES_PER_DIR = (MAX_FILE_BLOCKS * MFS_BLOCK_SIZE / 32) - 2  # 126 from new test
 
 MAX_NAME_LEN = 27
 
 BlockBuffer = c_char * MFS_BLOCK_SIZE
+BlockBufferHello = c_char * 5 
 
 class StatStruct(Structure):
    _fields_ = [("type", c_int), ("size", c_int)]
@@ -54,7 +56,9 @@ class MfsTest(Test):
 
    def start_server(self, image = None, libs = None, port = None):
       os.system("killall server")
-      image = "./test.img"
+      if image is None:
+         os.system("./mkfs -f test.img")
+         image = "./test.img"
       minport = 5000
       maxport = 10000
       for i in range(5):
@@ -85,21 +89,21 @@ class MfsTest(Test):
                "inum=" + str(inum) + " name=" + repr(name))
       return r
 
-   def write(self, inum, buf, block):
-      r = self.libmfs.MFS_Write(inum, byref(buf), block, 5)
+   def write(self, inum, buf, block, nbyte):
+      r = self.libmfs.MFS_Write(inum, byref(buf), block, nbyte)
       if r != 0:
          raise Failure("MFS_Write returned failure " +
                "inum=" + str(inum) + " block=" + str(block))
 
-   def read(self, inum, buf, block):
-      r = self.libmfs.MFS_Read(inum, byref(buf), block)
+   def read(self, inum, buf, block, nbyte):
+      r = self.libmfs.MFS_Read(inum, byref(buf), block, nbyte)
       if r != 0:
          raise Failure("MFS_Read returned failure " +
                "inum=" + str(inum) + " block=" + str(block))
 
-   def read_and_check(self, inum, block, expected):
+   def read_and_check(self, inum, block, expected, nbyte):
       buf = BlockBuffer()
-      self.read(inum, buf, block)
+      self.read(inum, buf, block, nbyte)
       if not bufs_equal(buf, expected):
          raise Failure("Corrupt data returned by read")
 
@@ -141,3 +145,17 @@ class MfsTest(Test):
       result = Test.fail(self, reason)
       self.terminate()
       return result
+
+   def create_image(self):
+      pwd = subprocess.check_output("pwd", shell=True);
+      command = str(pwd).replace('\n', '') + "/mkfs -f test.img"
+      os.system(command)
+      image = str(pwd).replace('\n', '') + "/test.img"
+      return image
+
+   def create_image_max(self, num_data_blocks, num_inodes):
+      pwd = subprocess.check_output("pwd", shell=True);
+      command = str(pwd).replace('\n', '') + "/mkfs -f test.img -d %i -i %i" %(num_data_blocks, num_inodes)
+      os.system(command)
+      image = str(pwd).replace('\n', '') + "/test.img"
+      return image
