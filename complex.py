@@ -96,7 +96,7 @@ class ComplexTest(MfsTest):
    description = "a long sequence of creats and writes followed by a check"
    timeout = 30
    def run(self):
-      image = self.create_image_max(32, 4096)
+      image = self.create_image_max(64, 64)
       self.loadlib()
       self.start_server(image)
       self.mfs_init("localhost", self.port)
@@ -132,7 +132,7 @@ class Complex2Test(MfsTest):
    description = "a long sequence of creats and writes followed by a check"
    timeout = 30
    def run(self):
-      image = self.create_image_max(32, 4096)
+      image = self.create_image_max(256, 128)
       self.loadlib()
       self.start_server(image)
       self.mfs_init("localhost", self.port)
@@ -171,7 +171,7 @@ class Persist2Test(MfsTest):
    description = "restart server after creating many dirs and files"
    timeout = 30
    def run(self):
-      image = self.create_image_max(32, 4096)
+      image = self.create_image_max(256, 128)
       self.loadlib()
       self.start_server(image)
       self.mfs_init("localhost", self.port)
@@ -279,7 +279,7 @@ class FreeTest(MfsTest):
    timeout = 90
 
    def run(self):
-      image = self.create_image_max(32, 4096)
+      image = self.create_image()
       self.loadlib()
       self.start_server(image)
       self.mfs_init("localhost", self.port)
